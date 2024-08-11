@@ -1,10 +1,6 @@
 #include "Node.cpp"
 #include <algorithm>
 
-const int LEAF = -1320912321;
-const int NEG_INF = -1787341123;
-const int POS_INF = -1543123123;
-
 int num_rep = 11;
 int num_query = 0;
 
@@ -43,9 +39,9 @@ int comp(Node *a, Node *b) {
 }
 
 int my_comp(Node *a, Node *b) {
-    if (a->value == NEG_INF || b->value == POS_INF)
+    if (a->left == a || b->right == b)
         return -1;
-    if (a->value == POS_INF || b->value == NEG_INF)
+    if (a->right == a || b->left == b)
         return 1;
     if (a == b)
         return 0;

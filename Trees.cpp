@@ -7,19 +7,19 @@ using namespace std;
 
 class NoisyRedBlackTree {
 private:
-    bool fast_mode;
+    bool version2;
     int siz, tim;
     Node *root, *neginf, *posinf;
 
     Node *get_new_leaf(Node *par) {
-        Node* neww = new Node("", LEAF);
+        Node* neww = new Node("", 0);
         neww->parent = par;
         neww->color = BLACK;
         return neww;
     }
 
     bool is_leaf(Node *nod) {
-        return nod->value == LEAF;
+        return nod->left == nullptr;
     }
 
     void preOrderHelper(Node *node) {
@@ -75,7 +75,7 @@ private:
         }
         if (v->c == 1) {
             // now check if in range
-            if (v == this->root || my_comp(get_l(v), key) < 0 and my_comp(key, get_r(v)) < 0) {
+            if (my_comp(get_l(v), key) < 0 and my_comp(key, get_r(v)) < 0) {
                 if (is_leaf(v))
                     v->c++;
                 else {
@@ -92,7 +92,7 @@ private:
             }
         } else {
             if (is_leaf(v)) {
-                if (my_comp(get_l(v), key) > 0 and my_comp(key, get_r(v)) > 0)
+                if (my_comp(get_l(v), key) < 0 and my_comp(key, get_r(v)) < 0)
                     v->c++;
                 else
                     v->c--;
@@ -106,9 +106,23 @@ private:
     }
 
     Node* searchTreeHelper(Node *node, Node *key) {
+        tim++;
         int num_steps = 3 * (ceil(log2((double)siz + 1.0) + 3));
         while (num_steps--)
             macro_step(node, key);
+
+        if (is_leaf(node) and version2) {
+            if (super_comp(get_l(node), key) < 0 and super_comp(key, get_r(node)) < 0) 
+                return node;
+            else
+                return searchTreeHelper(this->root, key);
+        } else if (version2) {
+            if (super_comp(node, key) == 0)
+                return node;
+            else
+                return searchTreeHelper(this->root, key);
+        }
+        
         return node;
     }
 
@@ -219,12 +233,14 @@ public:
         siz = 0;
         tim = 0;
         root = get_new_leaf(nullptr);
-        neginf = new Node("I AM LOWEST", NEG_INF);
-        posinf = new Node("I AM HIGHEST", POS_INF);
+        neginf = new Node("I AM LOWEST", 0);
+        neginf->left = neginf;
+        posinf = new Node("I AM HIGHEST", 0);
+        posinf->right = posinf;
     }
     
     void set_mode(bool mod) {
-        fast_mode = mod;
+        version2 = mod;
     }
 
     void preOrder() {
@@ -248,7 +264,6 @@ public:
     }
 
     Node* insert(string key, int value) {
-        tim++;
         Node *node = new Node(key, value);
         node->parent = nullptr;
         node->key = key;
@@ -267,11 +282,7 @@ public:
 
         Node *y = searchTreeHelper(this->root, node);
         if (!is_leaf(y)) {
-            int outcome = super_comp(node, y);
-            if (outcome == 0)
-                return y;
-            if (fast_mode)
-                return insert(key, value);
+            return y;
         } else 
             y = y->parent;
         // here we attach

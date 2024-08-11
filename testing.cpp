@@ -93,7 +93,7 @@ int grade_boosting(vector<string> &strings, vector<string> &ans) {
 void mfs_testing() {
     int T = 1;
     double avg_len = 0;
-    int maxi = 4000, num = 400;
+    int maxi = 1000, num = 1000;
     double tot = 0;
     double avg_error = 0;
     double avg_query_num = 0;
